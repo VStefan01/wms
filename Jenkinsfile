@@ -1,5 +1,9 @@
 pipeline {
     agent { label 'linux1' }
+
+    environment {
+        EMAIL_RECIPIENTS = 'vstefan02@gmail.com'
+    }
     
     stages {
         
@@ -17,14 +21,31 @@ pipeline {
         }
         
         stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
+                parallel {
+                    stage('IntegrationTest') {
+                        steps {
+                            sh "mvn test"
+                        }
+                    }
+                    stage('SonarCheck') {
+                        steps {
+                            script {
+                                try {
+                                     sh "mvn sonar:sonar \
+                                         -Dsonar.host.url=http://192.168.152.162:9000 \
+                                         -Dsonar.login=c9e14f5a71c67420abcf94e5fcc305bb298a3d3a"
+                                } catch(error) {
+                                   echo "The sonar server could not be reached ${error}"
+                                }
+                            }
+                        }
+                    }
+                }
         }
         
         stage('Package') {
             steps {
-                sh 'mvn package'
+                sh 'mvn clean package'
                 archiveArtifacts '**/target/*.jar'
                 fingerprint '**/target/*.jar'
             }
@@ -44,16 +65,21 @@ pipeline {
     
     post {
         success {
-            mail to:"vstefan02@gmail.com",
-                 subject:"Build \"${currentBuild.fullDisplayName}\" has status ${currentBuild.currentResult}",
-                 body:"Build ${currentBuild.fullDisplayName} is OK."
-               
-            }
-            
+            sendEmail("Successful");
+        }
+        unstable {
+            sendEmail("Unstable");
+        }
         failure {
-            mail to:"vstefan02@gmail.com",
-                 subject:"Build ${currentBuild.fullDisplayName} has status ${currentBuild.currentResult}",
-                 body:"Something went wrong with ${currentBuild.fullDisplayName}, please check it at ${env.BUILD_URL}"
+            sendEmail("Failed");
         }
     }
 }
+
+def sendEmail(status) {
+    mail(
+            to: "$EMAIL_RECIPIENTS",
+            subject: "Build $BUILD_NUMBER of ${currentBuild.fullDisplayName} has status " + status,
+            body: "Changes:\n " + getChangeString() + "\n\n Check console output at: $BUILD_URL/console" + "\n")
+}
+
