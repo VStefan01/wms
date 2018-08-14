@@ -1,4 +1,4 @@
-pipeline {
+pipeline { 
     agent { label 'linux1' }
 
     environment {
