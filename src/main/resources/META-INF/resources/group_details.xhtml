@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+>
+<h:body>
+    <ui:composition template="template.xhtml">
+
+        <ui:define name="breadcrumb">
+            <!-- Breadcrumb-->
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active">
+                    <a href="/groups">#{labels['menu.admin.groups']}</a>
+                </li>
+                <li class="breadcrumb-item">
+                    #{labels['menu.admin.groups.detail']}
+                </li>
+            </ol>
+        </ui:define>
+        <ui:define name="content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-10">
+                            <ui:fragment rendered="#{groupDetails.groupDetailVO.applicationGroup}">
+                                <h1>#{labels[groupDetails.groupDetailVO.name]}</h1>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{not groupDetails.groupDetailVO.applicationGroup}">
+                                <h1>#{groupDetails.groupDetailVO.name}</h1>
+                            </ui:fragment>
+                        </div>
+                        <div class="col-md-2">
+                            <ui:fragment rendered="#{not groupDetails.groupDetailVO.applicationGroup}">
+                                <p:confirmDialog global="true" showEffect="explode" hideEffect="fade">
+                                    <p:commandButton value="#{labels['button.yes']}" type="button"
+                                                     styleClass="btn btn-secondary  ui-confirmdialog-yes"
+                                                     icon="ui-icon-check"/>
+                                    <p:commandButton value="#{labels['button.no']}" type="button"
+                                                     styleClass="btn ui-confirmdialog-no" icon="ui-icon-close"/>
+                                </p:confirmDialog>
+                                <p:commandButton styleClass="hidden" pt:data-id="deleteGroup"
+                                                 action="#{groupDetails.deleteGroup}"
+                                                 onerror="errorMessage(#{labels['message.error.title']},#{labels['message.error.text']})"
+                                                 onclick="showSpinner()">
+                                    <p:confirm header="#{labels['modal.header.delete.group']}"
+                                               message="#{user.name} #{labels['modal.confirm.delete.group']}"/>
+                                </p:commandButton>
+                                <button type="button" class="btn btn-danger pull-right" style="margin-left: 5px;"
+                                    onclick="openConfirmDeleteGroupDialog()">
+                                    #{labels['button.delete']}</button>
+                                <button type="button" data-toggle="modal"
+                                        data-target="#editModal"
+                                        class="btn btn-secondary pull-right">#{labels['button.edit']}</button>
+                            </ui:fragment>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h:form id="groupUsers" prependId="false">
+                        <div class="modal fade" id="editModal" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-primary " role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title">#{labels['label.group.edit']}</h4>
+                                        <button type="button" class="close" data-dismiss="modal"
+                                                aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group row">
+                                            <label class="col-md-3 col-form-label">#{labels['label.group.name']}</label>
+                                            <div class="col-md-9">
+                                                <h:inputText styleClass="form-control" readonly="true"
+                                                             value="#{groupDetails.groupDetailVO.name}"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <label class="col-md-3 col-form-label">#{labels['label.group.description']}</label>
+                                            <div class="col-md-9">
+                                                <h:inputTextarea rows="5" value="#{groupDetails.groupDetailVO.description}"
+                                                                 styleClass="form-control"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                                data-dismiss="modal">#{labels['button.cancel']}</button>
+                                        <button class="btn btn-primary" data-dismiss="modal"
+                                                onclick="submitGroupEdit()">#{labels['button.save']}</button>
+                                        <p:commandButton styleClass="hidden" pt:data-id="editGroup"
+                                                         action="#{groupDetails.editGroup}"
+                                                         oncomplete="successMessage(args,#{labels['message.success.title']},'#{labels['message.group.edit']}');$('#addUsersModal').modal('hide');  $('body').removeClass('modal-open');
+                                                                 $('.modal-backdrop').remove();"
+                                                         onerror="errorMessage(#{labels['message.error.title']},#{labels['message.error.text']})"
+                                                         onclick="showSpinner()"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-bottom: 15px">
+                            <div class="col-md-10">
+                                <h4>
+                                    #{labels['label.members']}
+                                    <span class="badge badge-light badge-pill">#{groupDetails.groupDetailVO.memberCount}</span>
+                                </h4>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button"
+                                        class="btn btn-primary pull-right"
+                                        data-toggle="modal"
+                                        data-target="#addUsersModal">#{labels['button.users.add']}</button>
+
+
+                                <div class="modal fade" id="addUsersModal" tabindex="-1" role="dialog"
+                                     aria-labelledby="myModalLabel">
+                                    <div class="modal-dialog modal-primary modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">#{labels['label.users.group.add']}</h4>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                    <span aria-hidden="true">×</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <label class="col-md-3 col-form-label">#{labels['label.users']}</label>
+                                                    <div class="col-md-9">
+                                                        <p:autoComplete id="users" multiple="true"
+                                                                        value="#{groupDetails.users}"
+                                                                        completeMethod="#{groupDetails.completeUser}"
+                                                                        var="user" itemLabel="#{user.name}"
+                                                                        itemValue="#{user.id}" forceSelection="true"
+                                                                        converter="#{userVOConverter}"
+                                                                        placeholder="#{labels['placeholder.user.autocomplete']}">
+
+                                                            <p:column>
+                                                                <h:outputText value="#{user.name}"/>
+                                                            </p:column>
+                                                        </p:autoComplete>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                        data-dismiss="modal">#{labels['button.cancel']}</button>
+                                                <button class="btn btn-primary" data-dismiss="modal"
+                                                        onclick="submitUserList()">#{labels['button.save']}</button>
+
+                                                <p:commandButton styleClass="hidden" pt:data-id="addUsers"
+                                                                 action="#{groupDetails.addUsersToGroup}"
+                                                                 update="groupUsers"
+                                                                 oncomplete="successMessage(args,#{labels['message.success.title']},'#{labels['message.users.added.group']}');$('#addUsersModal').modal('hide');  $('body').removeClass('modal-open');
+                                                                 $('.modal-backdrop').remove();"
+                                                                 onerror="errorMessage(#{labels['message.error.title']},#{labels['message.error.text']})"
+                                                                 onclick="showSpinner()"/>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <p:dataTable var="user" value="#{groupDetails.groupDetailVO.users}" reflow="true" rows="10"
+                                     rowIndexVar="index" style="text-align: center"
+                                     styleClass="table">
+                            <p:column width="10%">
+                                <f:facet name="header">
+                                    <h:outputText value="#{labels['tables.index']}"/>
+                                </f:facet>
+                                <h:outputText
+                                        value="#{index + 1}"/>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputText value="#{labels['label.user.name']}"/>
+                                </f:facet>
+                                <a href="/users/details?user=#{user.id}">#{user.name}</a>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputText value="#{labels['label.user.email']}"/>
+                                </f:facet>
+                                #{user.email}
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputText value="#{labels['label.user.lastActive']}"/>
+                                </f:facet>
+                                <ui:fragment rendered="#{user.lastActive != null}">
+                                    <h:outputText value="#{user.lastActive}">
+                                        <f:convertDateTime pattern="dd MMM yyyy"/>
+                                    </h:outputText>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{user.lastActive == null}">
+                                    #{labels['label.user.never']}
+                                </ui:fragment>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                </f:facet>
+                                <p:confirmDialog global="true" showEffect="explode" hideEffect="fade">
+                                    <p:commandButton value="#{labels['button.yes']}" type="button"
+                                                     styleClass="btn btn-secondary  ui-confirmdialog-yes"
+                                                     icon="ui-icon-check"/>
+                                    <p:commandButton value="#{labels['button.no']}" type="button"
+                                                     styleClass="btn ui-confirmdialog-no" icon="ui-icon-close"/>
+                                </p:confirmDialog>
+                                <p:commandButton styleClass="hidden" pt:data-id="remove#{index+1}"
+                                                 action="#{groupDetails.removeUser(user.id)}" update="groupUsers"
+                                                 oncomplete="successMessage(args,#{labels['message.success.title']},'#{labels['message.user.removed.group']}')"
+                                                 onerror="errorMessage(#{labels['message.error.title']},#{labels['message.error.text']})"
+                                                 onclick="showSpinner()">
+                                    <p:confirm header="#{labels['modal.header.remove.user']}"
+                                               message="#{user.name} #{labels['modal.confirm.remove.user']}"/>
+                                </p:commandButton>
+                                <button type="button" class="btn btn-light"
+                                        onclick="openConfirmRemoveUserDialog(#{index+1})">#{labels['button.user.remove']}</button>
+                            </p:column>
+                        </p:dataTable>
+                    </h:form>
+                </div>
+            </div>
+            <h:outputScript>
+                function openConfirmRemoveUserDialog(index) {
+                    var buttonDataId = "remove" + index;
+                    $('*[data-id=' + buttonDataId).trigger('click');
+                }
+
+                function openConfirmDeleteGroupDialog(){
+                    $('*[data-id=deleteGroup').trigger('click');
+                }
+
+                function submitUserList(event) {
+                    $('*[data-id=addUsers').trigger('click');
+                }
+
+                function submitGroupEdit(event) {
+                    $('*[data-id=editGroup').trigger('click');
+                }
+            </h:outputScript>
+        </ui:define>
+
+    </ui:composition>
+
+</h:body>
+</html>

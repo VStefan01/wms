@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+>
+<body>
+<ui:composition>
+    <div class="sidebar">
+        <nav class="sidebar-nav">
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">
+                        <i class="nav-icon icon-speedometer"></i> #{labels['menu.dashboard']}
+                    </a>
+                </li>
+                <ui:fragment
+                        rendered="#{userProfile.roles.contains('BUILDINGS_READ') or userProfile.roles.contains('BUILDINGS_WRITE')}">
+                    <li class="nav-title">#{labels['menu.warehouse']}</li>
+                    <ui:fragment
+                            rendered="#{userProfile.roles.contains('BUILDINGS_READ') or userProfile.roles.contains('BUILDINGS_WRITE')}">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/buildings">
+                                <i class="nav-icon icon-home"></i> #{labels['menu.warehouse.buildings']}
+                            </a>
+                        </li>
+                    </ui:fragment>
+                </ui:fragment>
+                <ui:fragment
+                        rendered="#{userProfile.roles.contains('USERS_READ') or userProfile.roles.contains('GROUPS_READ')}">
+                    <li class="nav-title">#{labels['menu.admin']}</li>
+                    <ui:fragment
+                            rendered="#{userProfile.roles.contains('USERS_READ') or userProfile.roles.contains('GROUPS_READ')}">
+
+                        <li class="nav-item nav-dropdown">
+                            <a class="nav-link nav-dropdown-toggle" href="#">
+                                <i class="nav-icon icon-settings"></i> #{labels['menu.admin.users']}
+                            </a>
+                            <ul class="nav-dropdown-items">
+                                <ui:fragment
+                                        rendered="#{userProfile.roles.contains('USERS_READ')}">
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/users">
+                                            <i class="nav-icon icon-user"></i> #{labels['menu.admin.users.label']}</a>
+                                    </li>
+                                </ui:fragment>
+                                <ui:fragment
+                                        rendered="#{userProfile.roles.contains('GROUPS_READ')}">
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/groups">
+                                            <i class="nav-icon icon-people"></i> #{labels['menu.admin.groups']}
+                                        </a>
+                                    </li>
+                                </ui:fragment>
+                            </ul>
+                        </li>
+                    </ui:fragment>
+                </ui:fragment>
+            </ul>
+        </nav>
+        <button class="sidebar-minimizer brand-minimizer" type="button"></button>
+    </div>
+</ui:composition>
+</body>
+</html>

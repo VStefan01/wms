@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:body>
+    <ui:composition template="template.xhtml">
+        <ui:define name="breadcrumb">
+            <!-- Breadcrumb-->
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active">
+                    <a href="/groups">#{labels['menu.admin.groups']}</a>
+                </li>
+            </ol>
+        </ui:define>
+        <ui:define name="content">
+            <div class="card">
+                <div class="card-header">
+                    #{labels['page.admin.groups.list']}
+                    <div class="card-header-actions">
+                        <ui:fragment rendered="#{userProfile.roles.contains('GROUPS_WRITE')}">
+
+                            <a href="/groups/add" class="btn btn-block btn-outline-primary">
+                                #{labels['button.groups.add']}
+                            </a>
+                        </ui:fragment>
+                    </div>
+                </div>
+                <h:form id="groupsForm">
+                    <div class="card-body collapse show" id="collapseExample">
+                        <p:dataTable var="group" value="#{groups.groupVOList}" reflow="true" rows="10"
+                                     paginator="true"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,20"
+                                     rowIndexVar="index" style="text-align: center"
+                                     styleClass="table table-striped"
+                                    >
+                            <p:column width="10%">
+                                <f:facet name="header">
+                                    <h:outputText value="#{labels['tables.index']}"/>
+                                </f:facet>
+                                <h:outputText
+                                        value="#{index + 1}"/>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputText value="#{labels['label.group.name']}"/>
+                                </f:facet>
+                                <ui:fragment rendered="#{group.applicationGroup}">
+                                    <h:outputText value="#{labels[group.name]}"/>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{not group.applicationGroup}">
+                                    <h:outputText value="#{group.name}"/>
+                                </ui:fragment>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputText value="#{labels['label.group.roles']}"/>
+                                </f:facet>
+                                <ui:repeat value="#{group.roles}" var="role">
+                                    <span class="badge badge-primary">#{labels[role]}</span>
+                                </ui:repeat>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputText value="#{labels['label.group.description']}"/>
+                                </f:facet>
+                                <h:outputText value="#{group.description}"/>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputText value="#{labels['tables.actions']}"/>
+                                </f:facet>
+                                <a href="/groups/details?group=#{group.id}"
+                                   class="btn btn-ghost-primary">#{labels['button.details']}</a>
+                                <ui:fragment rendered="#{not group.applicationGroup}">
+                                    <p:confirmDialog global="true" showEffect="explode" hideEffect="fade">
+                                        <p:commandButton value="#{labels['button.yes']}" type="button"
+                                                         styleClass="btn btn-secondary  ui-confirmdialog-yes"
+                                                         icon="ui-icon-check"/>
+                                        <p:commandButton value="#{labels['button.no']}" type="button"
+                                                         styleClass="btn ui-confirmdialog-no" icon="ui-icon-close"/>
+                                    </p:confirmDialog>
+                                    <p:commandButton styleClass="hidden" pt:data-id="remove#{index+1}"
+                                                     action="#{groups.deleteGroup(group.id)}" update="groupsForm"
+                                                     oncomplete="successMessage(args,#{labels['message.success.title']},'#{labels['message.group.deleted']}');"
+                                                     onerror="errorMessage(#{labels['message.error.title']},#{labels['message.error.text']})"
+                                                     onclick="showSpinner()">
+                                        <p:confirm header="#{labels['modal.header.delete.group']}"
+                                                   message="#{user.name} #{labels['modal.confirm.delete.group']}"/>
+                                    </p:commandButton>
+                                    <button type="button" class="btn btn-ghost-danger"
+                                            onclick="openConfirmDeleteGroupDialog(#{index+1})">
+                                        #{labels['button.delete']}</button>
+                                </ui:fragment>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </h:form>
+            </div>
+            <h:outputScript>
+                function openConfirmDeleteGroupDialog(index) {
+                    var buttonDataId = "remove" + index;
+                    $('*[data-id=' + buttonDataId).trigger('click');
+                }
+            </h:outputScript>
+        </ui:define>
+
+    </ui:composition>
+
+</h:body>
+</html>

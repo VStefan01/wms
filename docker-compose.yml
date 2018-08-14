@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    depends_on: 
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - private
+    restart: always
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/cert:/cert
+      - ./LOG_nginx:/var/log/nginx/
+  
+  mysql:
+    image: wms/data
+    container_name: mysql
+    volumes:
+      - ./DATA:/var/lib/mysql
+    networks:
+      - private
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: wms     
+      MYSQL_USER: stefan
+      MYSQL_PASSWORD: passwd
+
+  app:
+    image: wms/app:latest
+    container_name: app
+    depends_on: 
+      - mysql
+    restart: always
+    volumes:
+      - ./LOG_app:/var/log
+    networks:
+      - private
+
+
+networks:
+    private:
+      driver: bridge

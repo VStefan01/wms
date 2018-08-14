@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:body>
+    <ui:composition template="template.xhtml">
+        <ui:define name="breadcrumb">
+            <!-- Breadcrumb-->
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active">
+                    <a href="/">#{labels['admin.customers']}</a>
+                </li>
+            </ol>
+        </ui:define>
+        <ui:define name="content">
+            <h:form id="customerForm" prependId="false">
+                <div class="row">
+                    <div class="col-sm-6">
+
+                        <div class="card">
+                            <div class="card-header">
+                                <strong>#{labels['customers.add']}</strong>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="company">#{labels['customers.company']}</label>
+                                    <p:inputText value="#{customers.customer.name}" styleClass="form-control"
+                                                 id="company"
+                                                 placeholder="#{labels['placeholder.company.name']}" required="true"
+                                                 requiredMessage="#{labels['validation.field.required']}"/>
+                                    <h:message for="company" style="color:red"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="vat">#{labels['customers.vatID']}</label>
+                                    <p:inputText value="${customers.customer.vatCode}" styleClass="form-control"
+                                                 id="vat"
+                                                 placeholder="In format RO00000000"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="street">#{labels['customers.address']}</label>
+                                    <p:inputText value="#{customers.customer.address}" styleClass="form-control"
+                                                 id="street"
+                                                 placeholder="#{labels['placeholder.company.street']}"/>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-sm-8">
+                                        <label for="city">#{labels['customers.city']}</label>
+                                        <p:inputText value="#{customers.customer.city}" styleClass="form-control"
+                                                     id="city"
+                                                     placeholder="#{labels['placeholder.company.city']}"/>
+                                    </div>
+                                    <div class="form-group col-sm-4">
+                                        <label for="postal-code">#{labels['customers.zip']}</label>
+                                        <p:inputText value="#{customers.customer.zipCode}" styleClass="form-control"
+                                                     id="postal-code"
+                                                     placeholder="#{labels['placeholder.company.zip']}"/>
+                                    </div>
+                                </div>
+                                <!--/.row-->
+                                <div class="form-group">
+                                    <label for="country">#{labels['customers.country']}</label>
+                                    <p:inputText value="#{customers.customer.country}" styleClass="form-control"
+                                                 id="country" placeholder="#{labels['placeholder.company.country']}"/>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                             <span class="input-group-text">
+                                                               <i class="fa fa-user"></i>
+                                              </span>
+                                        </div>
+                                        <p:inputText id="name" styleClass="form-control" value="#{customers.user.name}"
+                                                     placeholder="#{labels['placeholder.company.user.name']}"
+                                                     required="true"
+                                                     requiredMessage="#{labels['validation.field.required']}"/>
+                                        <h:message for="name" style="color:red"/>
+
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                             <span class="input-group-text">
+                                                               <i class="fa fa-envelope"></i>
+                                              </span>
+                                        </div>
+                                        <p:inputText id="email" styleClass="form-control"
+                                                     value="#{customers.user.email}"
+                                                     placeholder="#{labels['placeholder.company.user.email']}"
+                                                     required="true"
+                                                     requiredMessage="#{labels['validation.field.required']}">
+                                            <f:validator binding="#{uniqueEmailValidator}"/>
+                                        </p:inputText>
+                                        <h:message for="email" style="color:red"/>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <p:commandButton styleClass="hidden"
+                                                 action="#{customers.addCustomer}"
+                                                 update="customerForm" id="submit"
+                                                 oncomplete="successMessage(args,#{labels['message.success.title']},#{labels['message.customer.add']})"
+                                                 onerror="errorMessage(#{labels['message.error.title']},#{labels['message.error.text']})"/>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="submitClicked(event)">
+                                    <i class="fa fa-dot-circle-o"/>
+                                    #{labels['button.submit']}
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <strong>#{labels['customers.list']}</strong>
+                            </div>
+                            <div class="card-body">
+                                <p:dataTable var="customer" value="#{customers.customerList}" reflow="true" rows="10"
+                                             paginator="true"
+                                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                             rowsPerPageTemplate="5,10,20"
+                                             rowIndexVar="index" style="text-align: center"
+                                             styleClass="table table-striped">
+                                    <p:column>
+                                        <f:facet name="header">
+                                            <h:outputText value="#{labels['tables.index']}"/>
+                                        </f:facet>
+                                        <h:outputText
+                                                value="#{index + 1}"/>
+                                    </p:column>
+                                    <p:column headerText="#{labels['customers.company']}">
+                                        <h:outputText value="#{customer.name}"/>
+                                    </p:column>
+                                    <p:column headerText="#{labels['customers.city']}">
+                                        <h:outputText value="#{customer.city}"/>
+                                    </p:column>
+                                    <p:column headerText="#{labels['customers.vatID']}">
+                                        <h:outputText value="#{customer.vatCode}"/>
+                                    </p:column>
+                                </p:dataTable>
+                            </div>
+                        </div>
+                    </div>
+                    <h:outputScript>
+                        function submitClicked(e) {
+                            var form = $("#customerForm");
+                            form.validate({
+                                rules: {
+                                    company: {
+                                        required: true
+                                    },
+                                    name:{
+                                        required: true
+                                    },
+                                    email:{
+                                        required: true,
+                                        email:true
+                                    }
+                                }
+                            });
+                            if (form.valid()) {
+                                showSpinner();
+                                $('#submit').trigger('click');
+                            }
+                        }
+                    </h:outputScript>
+                </div>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</h:body>
+</html>

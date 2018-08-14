@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:body>
+    <ui:composition template="template.xhtml">
+        <ui:define name="breadcrumb">
+            <!-- Breadcrumb-->
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active">
+                    <a href="/users">#{labels['menu.admin.users.label']}</a>
+                </li>
+            </ol>
+        </ui:define>
+        <ui:define name="content">
+            <div class="card">
+                <div class="card-header">
+                    #{labels['page.admin.users.list']}
+                    <div class="card-header-actions">
+                        <ui:fragment rendered="#{userProfile.roles.contains('USERS_WRITE')}">
+                            <a href="/users/add" class="btn btn-block btn-outline-primary">
+                                #{labels['button.users.add']}
+                            </a>
+                        </ui:fragment>
+                    </div>
+                </div>
+                <h:form id="usersForm">
+                    <div class="card-body collapse show" id="collapseExample">
+                        <p:dataTable var="user" value="#{users.userVOList}" reflow="true" rows="10"
+                                     paginator="true"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,20"
+                                     rowIndexVar="index" style="text-align: center"
+                                     styleClass="table table-striped"
+                        >
+                            <p:column width="10%">
+                                <f:facet name="header">
+                                    <h:outputText value="#{labels['tables.index']}"/>
+                                </f:facet>
+                                <h:outputText
+                                        value="#{index + 1}"/>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+
+                                </f:facet>
+                                <ui:repeat value="#{user.groups}" var="group">
+                                    <span class="badge badge-primary">#{group}</span>
+                                </ui:repeat>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputText value="#{labels['label.user.email']}"/>
+                                </f:facet>
+                                #{user.email}
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputText value="#{labels['label.user.lastActive']}"/>
+                                </f:facet>
+                                <h:outputText value="#{user.lastActive}"/>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                </f:facet>
+                                <a href="/users/details?user=#{user.id}"
+                                   class="btn btn-ghost-primary">#{labels['button.details']}</a>
+                                <p:confirmDialog global="true" showEffect="explode" hideEffect="fade">
+                                    <p:commandButton value="#{labels['button.yes']}" type="button"
+                                                     styleClass="btn btn-secondary  ui-confirmdialog-yes"
+                                                     icon="ui-icon-check"/>
+                                    <p:commandButton value="#{labels['button.no']}" type="button"
+                                                     styleClass="btn ui-confirmdialog-no" icon="ui-icon-close"/>
+                                </p:confirmDialog>
+                                <p:commandButton styleClass="hidden" pt:data-id="remove#{index+1}"
+                                                 action="#{groups.deleteGroup(group.id)}" update="usersForm"
+                                                 oncomplete="successMessage(args,#{labels['message.success.title']},'#{labels['message.user.deactivated']}');"
+                                                 onerror="errorMessage(#{labels['message.error.title']},#{labels['message.error.text']})"
+                                                 onclick="showSpinner()">
+                                    <p:confirm header="#{labels['modal.header.delete.user']}"
+                                               message="#{user.name} #{labels['modal.confirm.delete.user']}"/>
+                                </p:commandButton>
+                                <button type="button" class="btn btn-ghost-danger"
+                                        onclick="openConfirmDeactivateUserDialog(#{index+1})">
+                                    #{labels['button.deactivate']}</button>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </h:form>
+            </div>
+
+        </ui:define>
+
+    </ui:composition>
+
+</h:body>
+</html>

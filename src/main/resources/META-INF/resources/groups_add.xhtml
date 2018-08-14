@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:body>
+    <ui:composition template="template.xhtml">
+        <ui:define name="breadcrumb">
+            <!-- Breadcrumb-->
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active">
+                    <a href="/users">#{labels['menu.admin.users']}</a>
+                </li>
+                <li class="breadcrumb-item">
+                    #{labels['menu.admin.users.add']}
+                </li>
+            </ol>
+        </ui:define>
+        <ui:define name="content">
+            <h:form id="groupForm" prependId="false">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card mx-4">
+                            <div class="card-body p-4">
+                                <h1>#{labels['users.group.add']}</h1>
+                                <p class="text-muted">#{labels['users.group.hint']}</p>
+                                <div class="form-group row">
+                                    <label class="col-md-3 col-form-label"
+                                           for="name">#{labels['label.group.name']}</label>
+                                    <div class="col-md-9">
+                                        <p:inputText id="name" styleClass="form-control"
+                                                     value="#{groupCreate.group.name}"
+                                                     required="true"
+                                                     requiredMessage="#{labels['validation.field.required']}"/>
+                                        <h:message for="name" style="color:red"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-md-3 col-form-label"
+                                           for="name">#{labels['label.group.description']}</label>
+                                    <div class="col-md-9">
+                                        <p:inputTextarea id="description" styleClass="form-control"
+                                                     value="#{groupCreate.group.description}"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-md-3 col-form-label"
+                                           for="name">#{labels['label.group.roles']}</label>
+                                    <div class="col-md-9">
+                                        <p:selectCheckboxMenu id="roles" value="#{groupCreate.selectedRoles}"
+                                                              label="Role(s)" multiple="true"
+                                                              filter="true" filterMatchMode="startsWith"
+                                                              styleClass="form-control">
+                                            <f:selectItems value="#{groupCreate.roles}" />
+                                        </p:selectCheckboxMenu>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary" onclick="submitClicked(event)">
+                                    #{labels['button.group']}
+                                </button>
+                                <a href="/groups" class="btn btn-outline-secondary">#{labels['button.cancel']}</a>
+                                <p:commandButton styleClass="hidden"
+                                                 action="#{groupCreate.createGroup}"
+                                                 update="groupForm" id="submit"
+                                                 onerror="errorMessage(#{labels['message.error.title']},#{labels['message.error.text']})"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h:outputScript>
+                    function submitClicked(e) {
+                    var form = $("#groupForm");
+                    form.validate({
+                    rules: {
+                    password: {
+                    required: true
+                    },
+                    repeat: {
+                    equalTo: "#password"
+                    },
+                    name: {
+                    required: true
+                    },
+                    email: {
+                    required: true,
+                    email: true
+                    }
+                    }
+                    });
+                    if (form.valid()) {
+                    showSpinner();
+                    $('#submit').trigger('click');
+                    }
+                    }
+
+                    $(document).ready(function(){
+                    $(Selector.NAVIGATION).find(Selector.NAV_LINK).each(function(key, value) {
+                    let link = value
+                    let cUrl = String(window.location).split('?')[0]
+
+                    if (cUrl.substr(cUrl.length - 1) === '#') {
+                    cUrl = cUrl.slice(0, -1)
+                    }
+
+                    if ($($(link))[0].href.includes(cUrl)) {
+                    $(link).addClass(ClassName.ACTIVE).parents(Selector.NAV_DROPDOWN_ITEMS).add(link).each(function(key,value) {
+                    link = value;
+                    $(link).parent().addClass(ClassName.OPEN)
+                    });
+                    }
+                    });});
+                </h:outputScript>
+            </h:form>
+        </ui:define>
+
+    </ui:composition>
+
+</h:body>
+</html>

@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  mysql:
+    build:
+       context: .
+       dockerfile: Dockerfile-data
+    image: wms/data
+    container_name: mysql
+    volumes:
+      - ./DATA:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: wms     
+      MYSQL_USER: stefan
+      MYSQL_PASSWORD: passwd

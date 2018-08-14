@@ -1,0 +1,56 @@
+<pretty-config xmlns="http://ocpsoft.org/schema/rewrite-config-prettyfaces"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://ocpsoft.org/schema/rewrite-config-prettyfaces
+                      http://ocpsoft.org/xml/ns/prettyfaces/rewrite-config-prettyfaces.xsd">
+
+    <url-mapping id="login">
+        <pattern value="/login" />
+        <view-id value="/login.html" />
+    </url-mapping>
+
+    <url-mapping id="customers">
+        <pattern value="/customers" />
+        <view-id value="/customers.xhtml" />
+    </url-mapping>
+
+
+    <url-mapping id="home">
+        <pattern value="/" />
+        <view-id value="/index.xhtml" />
+    </url-mapping>
+
+    <url-mapping id="users">
+        <pattern value="/users" />
+        <view-id value="/users.xhtml" />
+    </url-mapping>
+
+    <url-mapping id="users_add">
+        <pattern value="/users/add" />
+        <view-id value="/users_add.xhtml" />
+    </url-mapping>
+
+    <url-mapping id="groups">
+        <pattern value="/groups" />
+        <view-id value="/groups.xhtml" />
+    </url-mapping>
+
+    <url-mapping id="groups_add">
+        <pattern value="/groups/add" />
+        <view-id value="/groups_add.xhtml" />
+    </url-mapping>
+
+    <url-mapping id="groups_details">
+        <pattern value="/groups/details" />
+        <view-id value="/group_details.xhtml" />
+    </url-mapping>
+
+    <url-mapping id="buildings">
+        <pattern value="/buildings" />
+        <view-id value="/buildings.xhtml" />
+    </url-mapping>
+
+    <url-mapping id="changecredentials">
+        <pattern value="/changecredentials" />
+        <view-id value="/changecredentials.xhtml" />
+    </url-mapping>
+</pretty-config>

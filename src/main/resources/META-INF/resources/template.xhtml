@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets" lang="en">
+
+<h:head>
+    <title>WMS</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="" name="description"/>
+    <meta content="GHB Software" name="author"/>
+
+    <!-- Icons-->
+    <link href="/vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet"/>
+    <link href="/vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet"/>
+    <link href="/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
+    <link href="/vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet"/>
+    <link href="/vendors/toastr/css/toastr.min.css" rel="stylesheet"/>
+    <!-- Main styles for this application-->
+    <link href="/vendors/pace-progress/css/pace.min.css" rel="stylesheet"/>
+</h:head>
+
+
+<h:body styleClass="app header-fixed sidebar-fixed aside-menu-fixed sidebar-lg-show">
+    <h:outputStylesheet name="/css/style.css"/>
+    <ui:insert name="header">
+        <ui:include src="header.xhtml"/>
+    </ui:insert>
+    <div class="app-body">
+        <div class="ajax" style="display: none;">
+            <div class="ajaxinner">
+                <img src="/img/spinner.gif" alt=""/>
+            </div>
+        </div>
+        <ui:insert name="sidebare">
+            <ui:include src="sidebar.xhtml"/>
+        </ui:insert>
+
+        <main class="main">
+            <ui:insert name="breadcrumb"></ui:insert>
+
+            <div class="container-fluid">
+                <div class="animated fadeIn">
+                    <ui:insert name="content"></ui:insert>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script type="text/javascript" src="/vendors/jquery-validation/js/jquery.validate.js"></script>
+    <script type="text/javascript" src="/vendors/popper.js/js/popper.min.js"></script>
+    <script type="text/javascript" src="/vendors/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/vendors/pace-progress/js/pace.min.js"></script>
+    <script type="text/javascript" src="/vendors/perfect-scrollbar/js/perfect-scrollbar.min.js"></script>
+    <script type="text/javascript" src="/vendors/@coreui/coreui-pro/js/coreui.min.js"></script>
+    <script type="text/javascript" src="/vendors/toastr/js/toastr.js"></script>
+    <script type="text/javascript" src="/js/script.js"></script>
+</h:body>
+
+</html>
