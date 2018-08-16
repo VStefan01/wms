@@ -1,6 +1,6 @@
 FROM maven:3-jdk-8-slim
 
 WORKDIR /opt
-COPY ../../target/*.jar /opt/*.jar
+COPY /opt/wms_app/wms/target/*.jar /opt/*.jar
 
 CMD java -jar $(ls *.jar)
