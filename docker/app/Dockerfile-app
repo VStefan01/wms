@@ -1,7 +1,6 @@
 FROM maven:3-jdk-8-slim
 
 WORKDIR /opt
-COPY ./docker/app/application.properties /opt/application.properties
-COPY ./release/*.jar /opt/*.jar
+COPY ../../target/*.jar /opt/*.jar
 
 CMD java -jar $(ls *.jar)
