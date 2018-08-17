@@ -1,8 +1,10 @@
-pipeline { 
+pipeline {
     agent { label 'linux1' }
-
+    
     environment {
         EMAIL_RECIPIENTS = 'vstefan02@gmail.com'
+        IMAGE_NAME= 'wms/app'
+        CONTAINER_NAME= 'app'
     }
     
     stages {
@@ -43,22 +45,55 @@ pipeline {
                 }
         }
         
+        /*stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                        script {
+                            def qg = waitForQualityGate()
+                            if (qg.status != 'OK') {
+                                error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                            }
+                        }
+                }
+            }
+        }*/
+
         stage('Package') {
             steps {
-                sh 'mvn clean package'
+                sh 'mvn -DskipTests clean package'
                 archiveArtifacts '**/target/*.jar'
                 fingerprint '**/target/*.jar'
+                stash includes: '**/target/*.jar', name: 'appPackage'
+                stash includes: 'docker/**/*' , name: 'dockerConfig'
             }
         }
         
-        stage('Deploy') {
-            agent { label 'master' }
+        stage('Image Prune') {
+            //agent { label 'master'}
             steps {
-                echo "${BUILD_NUMBER}"
-                sh 'echo Shell $PWD'
-                sh "cp /var/lib/jenkins/jobs/docker/jobs/wms-pipeline-deploy/builds/${BUILD_NUMBER}/archive/target/wms-1.0.jar /home/stefan/wms-deploy/target"
-                sh "cd /home/stefan/wms-deploy && docker build -t wms/app -f Dockerfile-app ."
-                sh "cd /home/stefan/wms-deploy && docker-compose up -d"
+                imagePrune(CONTAINER_NAME)
+            }
+        }
+        
+        stage('Image Build') {
+            //agent { label 'master'}
+            steps {
+                dir('/opt/wms_app/wms') {
+                    unstash 'dockerConfig'
+                }
+                dir('/opt/wms_app/wms/docker/app') {
+                    unstash 'appPackage'
+                    sh "docker build -t $IMAGE_NAME -f Dockerfile-app ."
+                }
+            }
+        }
+        
+        stage('Runn App') {
+            //agent { label 'master'}
+            steps {
+                dir('/opt/wms_app/wms/docker') {
+                    sh "docker-compose up -d --force-recreate"
+                }
             }
         }
     }
@@ -76,10 +111,16 @@ pipeline {
     }
 }
 
+def imagePrune(containerName){
+    try {
+        sh "docker image rm -f $IMAGE_NAME"
+        sh "docker container rm -f $containerName"
+    } catch(error){}
+}
+
 def sendEmail(status) {
     mail(
             to: "$EMAIL_RECIPIENTS",
-            subject: "Build $BUILD_NUMBER of ${currentBuild.fullDisplayName} has status " + status,
-            body: "Changes:\n " + getChangeString() + "\n\n Check console output at: $BUILD_URL/console" + "\n")
+            subject: "Build $BUILD_NUMBER of ${currentBuild.fullDisplayName} has status " + status + "",
+            body: "Changes:\n $currentBuild.changeSets" + "\n\n You can see details at: $BUILD_URL " + "\n")
 }
-
