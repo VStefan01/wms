@@ -5,6 +5,7 @@ pipeline {
         EMAIL_RECIPIENTS = 'vstefan02@gmail.com'
         IMAGE_NAME= 'wms/app'
         CONTAINER_NAME= 'app'
+        GIT_COMMIT= ''
     }
     
     stages {
@@ -18,13 +19,18 @@ pipeline {
         
         stage('Build') {
             steps {
-                sh 'mvn clean compile'
+                script {
+                    GIT_COMMIT = getGitCommit()
+                    sh 'mvn clean compile'
+                }
+                
+                
             }
         }
         
         stage('Test') {
                 parallel {
-                    stage('IntegrationTest') {
+                    stage('UnitTest') {
                         steps {
                             sh "mvn test"
                         }
@@ -33,9 +39,9 @@ pipeline {
                         steps {
                             script {
                                 try {
-                                     sh "mvn sonar:sonar \
-                                         -Dsonar.host.url=http://192.168.152.162:9000 \
-                                         -Dsonar.login=c9e14f5a71c67420abcf94e5fcc305bb298a3d3a"
+                                     withSonarQubeEnv('sonar') {
+                                         sh 'mvn sonar:sonar'
+                                     }
                                 } catch(error) {
                                    echo "The sonar server could not be reached ${error}"
                                 }
@@ -45,7 +51,7 @@ pipeline {
                 }
         }
         
-        /*stage('Quality Gate') {
+        stage('Quality Gate') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                         script {
@@ -56,11 +62,11 @@ pipeline {
                         }
                 }
             }
-        }*/
+        }
 
         stage('Package') {
             steps {
-                sh 'mvn -DskipTests clean package'
+                sh 'mvn -Dmaven.test.skip=true clean package'
                 archiveArtifacts '**/target/*.jar'
                 fingerprint '**/target/*.jar'
                 stash includes: '**/target/*.jar', name: 'appPackage'
@@ -68,10 +74,11 @@ pipeline {
             }
         }
         
-        stage('Image Prune') {
+        stage('Container and Image Prune') {
             //agent { label 'master'}
             steps {
-                imagePrune(CONTAINER_NAME)
+                containerPrune()
+                imagePrune()
             }
         }
         
@@ -82,13 +89,15 @@ pipeline {
                     unstash 'dockerConfig'
                 }
                 dir('/opt/wms_app/wms/docker/app') {
-                    unstash 'appPackage'
-                    sh "docker build -t $IMAGE_NAME -f Dockerfile-app ."
+                        unstash 'appPackage'
+                        sh "docker build -t $IMAGE_NAME -f Dockerfile-app ."
+                        sh "docker build -t $IMAGE_NAME:$GIT_COMMIT -f Dockerfile-app ."
+                        echo "Pushing to docker registry $IMAGE_NAME:$GIT_COMMIT"                        
                 }
             }
         }
         
-        stage('Runn App') {
+        stage('Deploy') {
             //agent { label 'master'}
             steps {
                 dir('/opt/wms_app/wms/docker') {
@@ -111,10 +120,27 @@ pipeline {
     }
 }
 
-def imagePrune(containerName){
+def getGitCommit() {
+    def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+    def versionNumber;
+    if (gitCommit == null) {
+        versionNumber = env.BUILD_NUMBER;
+    } else {
+        versionNumber = gitCommit.take(8);
+    }
+    return versionNumber
+}
+
+def containerPrune(){
+    try {
+        sh "docker container rm -f $CONTAINER_NAME"
+    } catch(error){}
+}
+
+def imagePrune() {
     try {
         sh "docker image rm -f $IMAGE_NAME"
-        sh "docker container rm -f $containerName"
+        sh "docker image rm -f $IMAGE_NAME:$GIT_COMMIT"
     } catch(error){}
 }
 
@@ -122,5 +148,5 @@ def sendEmail(status) {
     mail(
             to: "$EMAIL_RECIPIENTS",
             subject: "Build $BUILD_NUMBER of ${currentBuild.fullDisplayName} has status " + status + "",
-            body: "Changes:\n $currentBuild.changeSets" + "\n\n You can see details at: $BUILD_URL " + "\n")
+            body: "Changes:\n $currentBuild.changeSets" + "\n\n You can see details at: $BUILD_URL \n")
 }
