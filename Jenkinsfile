@@ -70,12 +70,12 @@ pipeline {
                 archiveArtifacts '**/target/*.jar'
                 fingerprint '**/target/*.jar'
                 stash includes: '**/target/*.jar', name: 'appPackage'
-                stash includes: 'app/**/* database/**/* nginx/**/* docker-compose.yml' , name: 'dockerConfig'
+                stash includes: 'app/**/*, database/**/*, nginx/**/*, docker-compose.yml' , name: 'dockerConfig'
             }
         }
         
         stage('Container and Image Prune') {
-            agent { label 'master'}
+            //agent { label 'master'}
             steps {
                 containerPrune()
                 imagePrune()
@@ -83,7 +83,7 @@ pipeline {
         }
         
         stage('Image Build') {
-            agent { label 'master'}
+            //agent { label 'master'}
             steps {
                 dir('/opt/wms_app/wms') {
                     unstash 'dockerConfig'
@@ -92,13 +92,13 @@ pipeline {
                         unstash 'appPackage'
                         sh "docker build -t $IMAGE_NAME -f Dockerfile-app ."
                         sh "docker build -t $IMAGE_NAME:$GIT_COMMIT -f Dockerfile-app ."
-                        echo "Pushing to docker registry $IMAGE_NAME:$GIT_COMMIT"                        
+                        echo "Pushing to docker registry $IMAGE_NAME:$GIT_COMMIT"
                 }
             }
         }
         
         stage('Deploy') {
-            agent { label 'master'}
+            //agent { label 'master'}
             steps {
                 dir('/opt/wms_app/wms') {
                     sh "docker-compose up -d --force-recreate"
