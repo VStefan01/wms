@@ -75,7 +75,7 @@ pipeline {
         }
         
         stage('Container and Image Prune') {
-            //agent { label 'master'}
+            agent { label 'master'}
             steps {
                 containerPrune()
                 imagePrune()
@@ -83,7 +83,7 @@ pipeline {
         }
         
         stage('Image Build') {
-            //agent { label 'master'}
+            agent { label 'master'}
             steps {
                 dir('/opt/wms_app/wms') {
                     unstash 'dockerConfig'
@@ -98,7 +98,7 @@ pipeline {
         }
         
         stage('Deploy') {
-            //agent { label 'master'}
+            agent { label 'master'}
             steps {
                 dir('/opt/wms_app/wms') {
                     sh "docker-compose up -d --force-recreate"
@@ -121,7 +121,7 @@ pipeline {
 }
 
 def getGitCommit() {
-    def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+    def gitCommit = sh(script: 'git rev-parse HEAD', returnStdout: true)
     def versionNumber;
     if (gitCommit == null) {
         versionNumber = env.BUILD_NUMBER;
