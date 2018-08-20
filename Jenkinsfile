@@ -75,7 +75,7 @@ pipeline {
         }
         
         stage('Container and Image Prune') {
-            //agent { label 'master'}
+            agent { label 'master'}
             steps {
                 containerPrune()
                 imagePrune()
@@ -83,7 +83,7 @@ pipeline {
         }
         
         stage('Image Build') {
-            //agent { label 'master'}
+            agent { label 'master'}
             steps {
                 dir('/opt/wms_app/wms') {
                     unstash 'dockerConfig'
@@ -98,7 +98,7 @@ pipeline {
         }
         
         stage('Deploy') {
-            //agent { label 'master'}
+            agent { label 'master'}
             steps {
                 dir('/opt/wms_app/wms') {
                     sh "docker-compose up -d --force-recreate"
