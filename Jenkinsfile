@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'linux1' }
+    agent { label 'Node1' }
     
     environment {
         EMAIL_RECIPIENTS = 'vstefan02@gmail.com'
@@ -53,13 +53,15 @@ pipeline {
         
         stage('Quality Gate') {
             steps {
-                timeout(time: 2, unit: 'MINUTES') {
+                timeout(time: 10, unit: 'MINUTES') {
+                    retry(3) {
                         script {
                             def qg = waitForQualityGate()
                             if (qg.status != 'OK') {
                                 error "Pipeline aborted due to quality gate failure: ${qg.status}"
                             }
                         }
+                    }    
                 }
             }
         }
@@ -147,6 +149,6 @@ def imagePrune() {
 def sendEmail(status) {
     mail(
             to: "$EMAIL_RECIPIENTS",
-            subject: "Build $BUILD_NUMBER of ${currentBuild.fullDisplayName} has status " + status + "",
+            subject: "Build $BUILD_NUMBER of ${currentBuild.fullDisplayName} has status " + status ,
             body: "Changes:\n $currentBuild.changeSets" + "\n\n You can see details at: $BUILD_URL \n")
 }
