@@ -24,6 +24,8 @@ services:
       - ./DATA:/var/lib/mysql
     networks:
       - private
+    restart: always
+    user: root
     environment:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: wms     
