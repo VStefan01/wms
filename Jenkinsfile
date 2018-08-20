@@ -70,7 +70,7 @@ pipeline {
                 archiveArtifacts '**/target/*.jar'
                 fingerprint '**/target/*.jar'
                 stash includes: '**/target/*.jar', name: 'appPackage'
-                stash includes: 'docker/**/*' , name: 'dockerConfig'
+                stash includes: 'app/**/* database/**/* nginx/**/* docker-compose.yml' , name: 'dockerConfig'
             }
         }
         
