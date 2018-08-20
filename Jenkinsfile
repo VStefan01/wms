@@ -88,7 +88,7 @@ pipeline {
                 dir('/opt/wms_app/wms') {
                     unstash 'dockerConfig'
                 }
-                dir('/opt/wms_app/wms/docker/app') {
+                dir('/opt/wms_app/wms/app') {
                         unstash 'appPackage'
                         sh "docker build -t $IMAGE_NAME -f Dockerfile-app ."
                         sh "docker build -t $IMAGE_NAME:$GIT_COMMIT -f Dockerfile-app ."
@@ -100,7 +100,7 @@ pipeline {
         stage('Deploy') {
             //agent { label 'master'}
             steps {
-                dir('/opt/wms_app/wms/docker') {
+                dir('/opt/wms_app/wms') {
                     sh "docker-compose up -d --force-recreate"
                 }
             }
